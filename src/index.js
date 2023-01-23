@@ -47,8 +47,16 @@ function onFormSubmit(evt) {
   fetchImages(inputValue, page)
     .then(allCardsMarkup)
     .then(markup => {
+      console.log(markup);
+      if (markup !== '') {
+        loadMoreBtn.hidden = false;
+      }
       renderMarkup(markup);
-      loadMoreBtn.hidden = false;
+
+      const lightbox = new Simplelightbox('.gallery a', {
+        captionsData: 'alt',
+        captionDelay: 250,
+      });
     });
 }
 
@@ -58,17 +66,14 @@ async function fetchImages(inputValue, page) {
       `${BASE_URL}?key=${MY_KEY}&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
     );
     console.log(response);
-
-    if (page > response.data.totalHits / 40 && page > 1) {
+    const imagesArr = response.data.hits;
+    if (page !== 1 && page > response.data.totalHits / 40) {
       toastr.info("We're sorry, but you've reached the end of search results");
       loadMoreBtn.hidden = true;
     }
     if (page === 1 && response.data.totalHits > 0) {
       toastr.success(`Hooray! We found ${response.data.totalHits} images`);
-      console.log(response.data.totalHits);
     }
-
-    const imagesArr = response.data.hits;
     if (imagesArr.length === 0 && page === 1) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
@@ -129,8 +134,3 @@ function onLoadMoreClick() {
 
   fetchImages(inputValue, page).then(allCardsMarkup).then(renderMarkup);
 }
-console.log(SimpleLightbox);
-const lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionDelay: 250,
-});
