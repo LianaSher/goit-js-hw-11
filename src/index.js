@@ -40,14 +40,15 @@ loadMoreBtn.addEventListener('click', onLoadMoreClick);
 
 function onFormSubmit(evt) {
   evt.preventDefault();
-
+  loadMoreBtn.hidden = true;
   galleryEl.innerHTML = '';
+
   page = 1;
   inputValue = evt.target.elements.searchQuery.value;
+  console.log(inputValue);
   fetchImages(inputValue, page)
     .then(allCardsMarkup)
     .then(markup => {
-      console.log(markup);
       if (markup !== '') {
         loadMoreBtn.hidden = false;
       }
@@ -65,7 +66,7 @@ async function fetchImages(inputValue, page) {
     const response = await axios.get(
       `${BASE_URL}?key=${MY_KEY}&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
     );
-    console.log(response);
+
     const imagesArr = response.data.hits;
     if (page !== 1 && page > response.data.totalHits / 40) {
       toastr.info("We're sorry, but you've reached the end of search results");
@@ -78,8 +79,9 @@ async function fetchImages(inputValue, page) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
+      loadMoreBtn.hidden = true;
     }
-    console.log(imagesArr);
+
     return imagesArr;
   } catch (err) {
     console.log(err.message);
